@@ -11,13 +11,11 @@ class InvoiceStateContract : Contract{
     }
 
     override fun verify(tx: LedgerTransaction) {
-        requireThat {
-            /*
-             *
-             * For the simplicity of the sample, we unconditionally accept all of the transactions.
-             *
-             */
-        }
+        /*
+         *
+         * For the simplicity of the sample, we unconditionally accept all of the transactions.
+         *
+         */
     }
 
     interface Commands : CommandData {

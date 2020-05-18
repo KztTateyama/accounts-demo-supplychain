@@ -19,6 +19,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import net.corda.core.node.StatesToRecord
 import net.corda.core.utilities.ProgressTracker
+import net.corda.core.node.services.vault.QueryCriteria
 
 @StartableByRPC
 @StartableByService
@@ -99,6 +100,8 @@ class SendInvoiceResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
     override fun call() {
         //placeholder to record account information for later use
         val accountMovedTo = AtomicReference<AccountInfo>()
+        /* Tateyama add line 104 */
+        val accountSender = AtomicReference<AccountInfo>()
 
         //extract account information from transaction
         val transactionSigner = object : SignTransactionFlow(counterpartySession) {
@@ -110,6 +113,15 @@ class SendInvoiceResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
                 if (accountMovedTo.get() == null) {
                     throw IllegalStateException("Account to move to was not found on this node")
                 }
+                /* Tateyama add line from 117 to 123 */
+                val keyStateMovedFrom = stx.coreTransaction.outRefsOfType(InvoiceState::class.java).first().state.data.sender
+                keyStateMovedFrom.let {
+                    accountSender.set(accountService.accountInfo(keyStateMovedFrom.owningKey)?.state?.data)
+                }
+                if (accountSender.get() == null) {
+                    throw IllegalStateException("Sender Information was not found on this node")
+                }
+
             }
         }
         //record and finalize transaction
